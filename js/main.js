@@ -45,8 +45,12 @@ game.States.start = function () {
         /** init */
         this.initUI();
         this.initGameBounds();
+        this.swipe = new Swipe(this.game,this.swipeCheck);
     };
     this.update = function () {
+
+    };
+    this.swipeCheck = function () {
 
     };
     /**
@@ -59,7 +63,23 @@ game.States.start = function () {
         mainInterfaceGraphics.beginFill(0xADA79A,0.5);
         mainInterfaceGraphics.drawRoundedRect(0,0,220,220,10);
         mainInterfaceGraphics.endFill();
-
+        /**
+         * 多种颜色类别
+         * */
+        this.colors = {
+            2: 0x49B4B4,
+            4: 0x4DB574,
+            8: 0x78B450,
+            16: 0xC4C362,
+            32: 0xCEA346,
+            64: 0xDD8758,
+            128: 0xBF71B3,
+            256: 0x9F71BF,
+            512: 0x7183BF,
+            1024: 0x71BFAF,
+            2048: 0xFF7C80
+        };
+        this.rerunGame();
     };
     /**
      * 初始背景 当前分数和最高分数
@@ -105,8 +125,85 @@ game.States.start = function () {
         bestSprite.addChild(this.bestText);
         game.add.button(180,15,'btnRestart',this.rerunGame,this);
     };
-    this.rerunGame = function (button, pointer, isOver) {
+    this.rerunGame = function () {
+        this.score = 0;
+        this.scoreText.text = this.score;
+        if (this.array){
+            for (var i = 0; i < 4; i++) {
+                for (var j = 0; j < 4; j++) {
+                    if (this.array[i][j].sprite) {
+                        this.array[i][j].sprite.kill();
+                    }
+                }
+            }
+        }
+        /**
+         * 一个 4*4 的数组
+         * */
+        this.array = [];
+        for (var i = 0; i < 4; i++) {
+            this.array[i] = [];
+            for (var j = 0; j < 4; j++) {
+                this.array[i][j] = {};
+                this.array[i][j].value = 0;
+                this.array[i][j].x = i;
+                this.array[i][j].y = j;
+            }
+        }
+        /**
+         * 是否响应swipe
+         * */
+        this.canSwipe = true;
+        /** 开始游戏 - 创建方块 */
+        this.generateSquare();
+    };
+    /**
+     * 随机创建一个方块
+     * */
+    this.generateSquare = function () {
+        console.log('创建一个方块');
+        var x = Math.floor(Math.random() * 4);
+        var y = Math.floor(Math.random() * 4);
+        while (this.array[x][y].value != 0) {
+            x = Math.floor(Math.random() * 4);
+            y = Math.floor(Math.random() * 4);
+        }
+        var value = 2;
+        if (Math.random() > 0.5) {
+            value = 4;
+        }
+        this.placeSquare(x, y, value);
+    };
+    /**
+     * 根据 x,y 值放置一个 值为 value 的方块
+     * */
+    this.placeSquare = function (x, y, value) {
+        var squareStyle = {font: "bold 20px Arial", fill: "#FFFFFF", boundsAlignH: "center", boundsAlignV: "middle"};
+        var square = game.add.sprite();
+        square.reset(this.transX(x), this.transY(y));
+        var squareBackground = game.add.graphics(-45 / 2, -45 / 2);
+        squareBackground.beginFill(this.colors[value]);
+        squareBackground.drawRoundedRect(0, 0, 45, 45, 5);
+        squareBackground.endFill();
+        square.addChild(squareBackground);
+        var squareText = game.add.text(-45 / 2, -45 / 2, value, squareStyle);
+        squareText.setTextBounds(0, 0, 45, 45);
+        square.addChild(squareText);
+        this.array[x][y].value = value;
+        this.array[x][y].sprite = square;
+        square.anchor.setTo(0.5, 0.5);
+        square.scale.setTo(0.0, 0.0);
+        var tween = game.add.tween(square.scale).to({x: 1.0, y: 1.0}, 100, Phaser.Easing.Sinusoidal.InOut, true);
+        tween.onComplete.add(function () {
 
+        }, this);
+    };
+    // 坐标转换
+    this.transX = function (x) {
+        return 10 + 8 * (x + 1) + x * 45 + 45 / 2;
+    };
+    this.transY = function (y) {
+        return 80 + 8 * (y + 1) + y * 45 + 45 / 2;
     };
 };
 game.state.add('boot',game.States.boot);
