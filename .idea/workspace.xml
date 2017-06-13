@@ -1,10 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project version="4">
   <component name="ChangeListManager">
-    <list default="true" id="55917270-569c-44e1-bb74-038815bd23aa" name="Default" comment="">
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/.idea/workspace.xml" afterPath="$PROJECT_DIR$/.idea/workspace.xml" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/js/main.js" afterPath="$PROJECT_DIR$/js/main.js" />
-    </list>
+    <list default="true" id="55917270-569c-44e1-bb74-038815bd23aa" name="Default" comment="" />
     <ignored path="$PROJECT_DIR$/.tmp/" />
     <ignored path="$PROJECT_DIR$/temp/" />
     <ignored path="$PROJECT_DIR$/tmp/" />
@@ -77,9 +74,10 @@
     <sorting>DEFINITION_ORDER</sorting>
   </component>
   <component name="ProjectFrameBounds">
-    <option name="x" value="802" />
-    <option name="width" value="798" />
-    <option name="height" value="900" />
+    <option name="x" value="78" />
+    <option name="y" value="23" />
+    <option name="width" value="1596" />
+    <option name="height" value="877" />
   </component>
   <component name="ProjectLevelVcsManager" settingsEditedManually="true" />
   <component name="ProjectView">
@@ -148,7 +146,6 @@
     <property name="nodejs_interpreter_path" value="/usr/local/bin/node" />
     <property name="WebServerToolWindowFactoryState" value="false" />
     <property name="HbShouldOpenHtmlAsHb" value="" />
-    <property name="FullScreen" value="true" />
   </component>
   <component name="RecentsManager">
     <key name="CopyFile.RECENT_KEYS">
@@ -250,15 +247,15 @@
       <workItem from="1497254158279" duration="133000" />
       <workItem from="1497254316725" duration="7945000" />
       <workItem from="1497262905554" duration="32000" />
-      <workItem from="1497316601062" duration="1759000" />
+      <workItem from="1497316601062" duration="1828000" />
     </task>
     <servers />
   </component>
   <component name="TimeTrackingManager">
-    <option name="totallyTimeSpent" value="9869000" />
+    <option name="totallyTimeSpent" value="9938000" />
   </component>
   <component name="ToolWindowManager">
-    <frame x="802" y="0" width="798" height="900" extended-state="0" />
+    <frame x="78" y="23" width="1596" height="877" extended-state="0" />
     <editor active="true" />
     <layout>
       <window_info id="Project" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.50349206" sideWeight="0.5" order="0" side_tool="false" content_ui="combo" />
