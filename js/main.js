@@ -42,16 +42,8 @@ game.States.main = function () {
 };
 game.States.start = function () {
     this.create = function () {
-        /** init */
         this.initUI();
         this.initGameBounds();
-        this.swipe = new Swipe(this.game,this.swipeCheck);
-    };
-    this.update = function () {
-
-    };
-    this.swipeCheck = function () {
-
     };
     /**
      * 初始游戏区域背景
@@ -79,6 +71,7 @@ game.States.start = function () {
             1024: 0x71BFAF,
             2048: 0xFF7C80
         };
+        this.swipe = new Swipe(game,this.swipeCheck);
         this.rerunGame();
     };
     /**
@@ -124,6 +117,11 @@ game.States.start = function () {
         this.bestText.setTextBounds(0,0,70,50);
         bestSprite.addChild(this.bestText);
         game.add.button(180,15,'btnRestart',this.rerunGame,this);
+    };
+    this.update = function () {
+        if (this.canSwipe) {
+            this.swipe.check();
+        }
     };
     this.rerunGame = function () {
         this.score = 0;
@@ -204,6 +202,154 @@ game.States.start = function () {
     };
     this.transY = function (y) {
         return 80 + 8 * (y + 1) + y * 45 + 45 / 2;
+    };
+
+    this.swipeUp = function () {
+        this.swipeInit();
+        for (var i = 0; i < this.array.length; i++) {
+            for (var j = 1; j < this.array.length; j++) {
+                if (this.array[i][j].value != 0) {
+                    var index = j - 1;
+                    while (index > 0 && this.array[i][index].value == 0) {
+                        index--;
+                    }
+                    this.swipeCommon(i, j, this.array[i][index], {x: this.transX(i), y: this.transY(index)},
+                        index + 1 != j, this.array[i][index + 1], {x: this.transX(i), y: this.transY(index + 1)});
+                }
+            }
+        }
+        this.swipeDone();
+    };
+    this.swipeDown = function () {
+        this.swipeInit();
+        for (var i = 0; i < this.array.length; i++) {
+            for (var j = this.array.length - 2; j >= 0; j--) {
+                if (this.array[i][j].value != 0) {
+                    var index = j + 1;
+                    while (index < this.array.length - 1 && this.array[i][index].value == 0) {
+                        index++;
+                    }
+                    this.swipeCommon(i, j, this.array[i][index], {x: this.transX(i), y: this.transY(index)},
+                        index - 1 != j, this.array[i][index - 1], {x: this.transX(i), y: this.transY(index - 1)});
+                }
+            }
+        }
+        this.swipeDone();
+    };
+    this.swipeLeft = function () {
+        this.swipeInit();
+        for (var i = 1; i < this.array.length; i++) {
+            for (var j = 0; j < this.array.length; j++) {
+                if (this.array[i][j].value != 0) {
+                    var index = i - 1;
+                    while (index > 0 && this.array[index][j].value == 0) {
+                        index--;
+                    }
+                    this.swipeCommon(i, j, this.array[index][j], {x: this.transX(index), y: this.transY(j)},
+                        index + 1 != i, this.array[index + 1][j], {x: this.transX(index + 1), y: this.transY(j)});
+                }
+            }
+        }
+        this.swipeDone();
+    };
+    this.swipeRight = function () {
+        this.swipeInit();
+        for (var i = this.array.length - 2; i >= 0; i--) {
+            for (var j = 0; j < this.array.length; j++) {
+                if (this.array[i][j].value != 0) {
+                    var index = i + 1;
+                    while (index < this.array.length - 1 && this.array[index][j].value == 0) {
+                        index++;
+                    }
+                    this.swipeCommon(i, j, this.array[index][j], {x: this.transX(index), y: this.transY(j)},
+                        index - 1 != i, this.array[index - 1][j], {x: this.transX(index - 1), y: this.transY(j)});
+                }
+            }
+        }
+        this.swipeDone();
+    };
+    this.swipeInit = function () {
+        this.canSwipe = false;
+        game.time.events.add(Phaser.Timer.SECOND * 0.5, function () {
+            if (!this.canSwipe) {
+                this.canSwipe = true;
+            }
+        }, this);
+    };
+    this.swipeDone = function () {
+        for (var i = 0; i < this.array.length; i++) {
+            for (var j = 0; j < this.array.length; j++) {
+                this.array[i][j].newNode = undefined;
+            }
+        }
+    };
+    this.swipeCommon = function (i, j, arrNode, posJson, condition, nextArrNode, nextPosJson) {
+        var that = this;
+        var duration = 100;
+        // 遇到了可以合并的
+        if (!arrNode.newNode && arrNode.value == this.array[i][j].value) {
+            arrNode.value = arrNode.value * 2;
+            arrNode.newNode = true;
+            this.array[i][j].value = 0;
+            this.score = this.score + arrNode.value;
+            this.scoreText.text = this.score;
+            if (this.score > this.best) {
+                this.best = this.score;
+                this.bestText.text = this.best;
+            }
+            // 渐渐透明后被kill掉
+            var t1 = game.add.tween(arrNode.sprite).to({alpha: 0}, duration, Phaser.Easing.Linear.None, true);
+            t1.onComplete.add(function () {
+                this.sprite.kill();
+                that.placeSquare(this.x, this.y, this.value);
+                if (!that.canSwipe) {
+                    that.canSwipe = true;
+                    that.generateSquare();
+                }
+            }, arrNode);
+            var t2 = game.add.tween(this.array[i][j].sprite).to({alpha: 0}, duration, Phaser.Easing.Linear.None, true);
+            t2.onComplete.add(function () {
+                this.kill();
+                if (!that.canSwipe) {
+                    that.canSwipe = true;
+                    that.generateSquare();
+                }
+            }, this.array[i][j].sprite);
+            game.add.tween(this.array[i][j].sprite).to(posJson, duration, Phaser.Easing.Linear.None, true);
+            arrNode.sprite = this.array[i][j].sprite;
+            this.array[i][j].sprite = undefined;
+        } else if (arrNode.value == 0) {
+            arrNode.value = this.array[i][j].value;
+            this.array[i][j].value = 0;
+            var t = game.add.tween(this.array[i][j].sprite).to(posJson, duration, Phaser.Easing.Linear.None, true);
+            t.onComplete.add(function () {
+                if (!that.canSwipe) {
+                    that.canSwipe = true;
+                    that.generateSquare();
+                }
+            });
+            arrNode.sprite = this.array[i][j].sprite;
+            this.array[i][j].sprite = undefined;
+        } else if (condition) {
+            nextArrNode.value = this.array[i][j].value;
+            this.array[i][j].value = 0;
+            var t = game.add.tween(this.array[i][j].sprite).to(nextPosJson, duration, Phaser.Easing.Linear.None, true);
+            t.onComplete.add(function () {
+                if (!that.canSwipe) {
+                    that.canSwipe = true;
+                    that.generateSquare();
+                }
+            });
+            nextArrNode.sprite = this.array[i][j].sprite;
+            this.array[i][j].sprite = undefined;
+        }
+    };
+
+    this.swipeCheck = {
+        up: this.swipeUp.bind(this),
+        down: this.swipeDown.bind(this),
+        left: this.swipeLeft.bind(this),
+        right: this.swipeRight.bind(this)
     };
 };
 game.state.add('boot',game.States.boot);
